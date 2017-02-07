@@ -3,9 +3,7 @@
 # Recipe:: default
 #
 
-def cask_installed?(name)
-  `/usr/local/bin/brew cask list 2>/dev/null`.split.include?(name)
-end
+
 
 # This function calls the upstream homebrew resource built into chef
 def run_upstream(package, action, options, ignore_failure)
@@ -21,7 +19,7 @@ def install_cask(name, ignore_failure, options)
     ignore_failure ignore_failure
     user homebrew_owner
     environment lazy { {'HOME' => ::Dir.home(homebrew_owner), 'USER' => homebrew_owner} }
-    not_if { cask_installed?(name) }
+    not_if `/usr/local/bin/brew cask list 2>/dev/null`.split.include?(name)
     command "brew cask install #{name} #{options}".strip!
   end
 end
@@ -31,13 +29,13 @@ def uninstall_cask(name, ignore_failure, options)
     ignore_failure ignore_failure
     user homebrew_owner
     environment lazy { {'HOME' => ::Dir.home(homebrew_owner), 'USER' => homebrew_owner} }
-    only_if { cask_installed?(name) }
+    only_if `/usr/local/bin/brew cask list 2>/dev/null`.split.include?(name)
     command "brew cask uninstall #{name} #{options}".strip!
   end
 end
 
 def upgrade_cask(name, ignore_failure, options)
-  if cask_installed?(name)
+  if `/usr/local/bin/brew cask list 2>/dev/null`.split.include?(name)
     execute 'cask_upgrade' do
       ignore_failure ignore_failure
       user homebrew_owner
