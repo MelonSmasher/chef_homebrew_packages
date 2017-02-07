@@ -20,7 +20,9 @@ def install_cask(name, ignore_failure, options)
   execute 'cask_install' do
     ignore_failure ignore_failure
     user homebrew_owner
-    command "brew cask install #{name} #{options}"
+    environment lazy { {'HOME' => ::Dir.home(homebrew_owner), 'USER' => homebrew_owner} }
+    not_if cask_installed?(name)
+    command "brew cask install #{name} #{options}".strip!
   end
 end
 
@@ -28,39 +30,33 @@ def uninstall_cask(name, ignore_failure, options)
   execute 'cask_uninstall' do
     ignore_failure ignore_failure
     user homebrew_owner
-    command "brew cask uninstall #{name} #{options}"
+    environment lazy { {'HOME' => ::Dir.home(homebrew_owner), 'USER' => homebrew_owner} }
+    only_if cask_installed?(name)
+    command "brew cask uninstall #{name} #{options}".strip!
   end
 end
 
 def upgrade_cask(name, ignore_failure, options)
-  execute 'cask_upgrade' do
-    ignore_failure ignore_failure
-    user homebrew_owner
-    command "brew cu --cask #{name} #{options}"
+  if cask_installed?(name)
+    execute 'cask_upgrade' do
+      ignore_failure ignore_failure
+      user homebrew_owner
+      environment lazy { {'HOME' => ::Dir.home(homebrew_owner), 'USER' => homebrew_owner} }
+      command "brew cu --cask #{name} #{options}".strip!
+    end
+  else
+    install_cask(name, ignore_failure, options)
   end
 end
 
 def run_cask(package, action, options, ignore_failure)
   case action
     when :install
-      if cask_installed? package
-        log 'Cask' do
-          message "Package #{package} installed."
-          level :info
-        end
-      else
-        install_cask(package, ignore_failure, options)
-      end
+      install_cask(package, ignore_failure, options)
     when :upgrade
-      if cask_installed? package
-        upgrade_cask(package, ignore_failure, options)
-      else
-        install_cask(package, ignore_failure, options)
-      end
+      upgrade_cask(package, ignore_failure, options)
     when :remove, :purge
-      if cask_installed? package
-        uninstall_cask(package, ignore_failure, options)
-      end
+      uninstall_cask(package, ignore_failure, options)
     else
       log 'Cask' do
         message "Package #{package} supplied with invalid option."
@@ -68,7 +64,6 @@ def run_cask(package, action, options, ignore_failure)
       end
   end
 end
-
 
 
 include_recipe 'homebrew'
