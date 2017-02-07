@@ -1,9 +1,11 @@
-include Chef::Mixin::ShellOut
-
 #
 # Cookbook:: homebrew_packages
 # Recipe:: default
 #
+
+def cask_installed?(name)
+  `/usr/local/bin/brew cask list 2>/dev/null`.split.include?(name)
+end
 
 # This function calls the upstream homebrew resource built into chef
 def run_upstream(package, action, options, ignore_failure)
@@ -19,7 +21,7 @@ def install_cask(name, ignore_failure, options)
     ignore_failure ignore_failure
     user homebrew_owner
     environment lazy { {'HOME' => ::Dir.home(homebrew_owner), 'USER' => homebrew_owner} }
-    not_if shell_out!("/usr/local/bin/brew cask list 2>/dev/null").stdout.split.include?(name)
+    not_if { cask_installed?(name) }
     command "brew cask install #{name} #{options}".strip!
   end
 end
@@ -29,13 +31,13 @@ def uninstall_cask(name, ignore_failure, options)
     ignore_failure ignore_failure
     user homebrew_owner
     environment lazy { {'HOME' => ::Dir.home(homebrew_owner), 'USER' => homebrew_owner} }
-    only_if shell_out!("/usr/local/bin/brew cask list 2>/dev/null").stdout.split.include?(name)
+    only_if { cask_installed?(name) }
     command "brew cask uninstall #{name} #{options}".strip!
   end
 end
 
 def upgrade_cask(name, ignore_failure, options)
-  if shell_out!("/usr/local/bin/brew cask list 2>/dev/null").stdout.split.include?(name)
+  if cask_installed?(name)
     execute 'cask_upgrade' do
       ignore_failure ignore_failure
       user homebrew_owner
