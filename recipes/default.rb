@@ -3,8 +3,6 @@
 # Recipe:: default
 #
 
-include Homebrew::Mixin
-
 # This function calls the upstream homebrew resource built into chef
 def run_upstream(package, action, options, ignore_failure)
   homebrew_package package do
