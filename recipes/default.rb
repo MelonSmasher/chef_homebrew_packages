@@ -1,3 +1,5 @@
+include ::Homebrew::Mixin
+
 #
 # Cookbook:: homebrew_packages
 # Recipe:: default
@@ -19,6 +21,7 @@ end
 def install_cask(name, ignore_failure, options)
   execute 'cask_install' do
     ignore_failure ignore_failure
+    user homebrew_owner
     command "brew cask install #{name} #{options}"
   end
 end
@@ -26,6 +29,7 @@ end
 def uninstall_cask(name, ignore_failure, options)
   execute 'cask_uninstall' do
     ignore_failure ignore_failure
+    user homebrew_owner
     command "brew cask uninstall #{name} #{options}"
   end
 end
@@ -33,6 +37,7 @@ end
 def upgrade_cask(name, ignore_failure, options)
   execute 'cask_upgrade' do
     ignore_failure ignore_failure
+    user homebrew_owner
     command "brew cu --cask #{name} #{options}"
   end
 end
@@ -65,6 +70,8 @@ def run_cask(package, action, options, ignore_failure)
       end
   end
 end
+
+
 
 include_recipe 'homebrew'
 
