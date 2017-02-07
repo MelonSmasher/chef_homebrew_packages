@@ -17,7 +17,7 @@ ignore_failure = node['homebrew_packages']['ignore_failure']
 # Grab install options that will be applied to each package
 install_options = []
 unless node['homebrew_packages']['install_options'].nil?
-  unless node['yacc']['install_options'].empty?
+  unless node['homebrew_packages']['install_options'].empty?
     # Are the install options an array?
     if node['homebrew_packages']['install_options'].is_a? Array
       # Join into a single array
