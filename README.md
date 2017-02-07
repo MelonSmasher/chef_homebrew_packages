@@ -56,6 +56,10 @@ Define packages:
       },
       "sl": {
         "action": "purge"
+      },
+      "google-chrome": {
+        "action": "upgrade",
+        "cask": true
       }
     }
   }
