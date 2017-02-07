@@ -34,7 +34,7 @@ def uninstall_cask(name, ignore_failure, options)
 end
 
 def upgrade_cask(name, ignore_failure, options)
-  if Mixlib::ShellOut.new("/usr/local/bin/brew cask list 2>/dev/null").run_command.stdout.split.include?(name)
+  if Mixlib::ShellOut.new("/usr/local/bin/brew cask list 2>/dev/null").run_command.stdout.split.include?(name).equal?(true)
     execute 'cask_upgrade' do
       ignore_failure ignore_failure
       user homebrew_owner
@@ -45,23 +45,6 @@ def upgrade_cask(name, ignore_failure, options)
     install_cask(name, ignore_failure, options)
   end
 end
-
-def run_cask(package, action, options, ignore_failure)
-  case action
-    when :install
-      install_cask(package, ignore_failure, options)
-    when :upgrade
-      upgrade_cask(package, ignore_failure, options)
-    when :remove, :purge
-      uninstall_cask(package, ignore_failure, options)
-    else
-      log 'Cask' do
-        message "Package #{package} supplied with invalid option."
-        level :warn
-      end
-  end
-end
-
 
 include_recipe 'homebrew'
 
@@ -121,34 +104,41 @@ node['homebrew_packages']['packages'].each do |package, package_options|
   case action_option
     when 'install'
       if package_options['cask']
-        run_cask(package, :install, final_install_options, ignore_failure)
+        install_cask(package, ignore_failure, final_install_options)
       else
         run_upstream(package, :install, final_install_options, ignore_failure)
       end
     when 'purge'
       if package_options['cask']
-        run_cask(package, :purge, final_install_options, ignore_failure)
+        uninstall_cask(package, ignore_failure, final_install_options)
       else
         run_upstream(package, :purge, final_install_options, ignore_failure)
       end
     when 'remove'
       if package_options['cask']
-        run_cask(package, :remove, final_install_options, ignore_failure)
+        uninstall_cask(package, ignore_failure, final_install_options)
       else
         run_upstream(package, :remove, final_install_options, ignore_failure)
       end
     when 'upgrade'
       if package_options['cask']
-        run_cask(package, :upgrade, final_install_options, ignore_failure)
+        upgrade_cask(package, ignore_failure, final_install_options)
       else
         run_upstream(package, :upgrade, final_install_options, ignore_failure)
       end
     else # If we make it here, try the action as a version number.
-      homebrew_package package do
-        version action_option
-        options final_install_options
-        ignore_failure ignore_failure
-        action :install
+      if package_options['cask']
+        log 'Cask' do
+          message "Package #{package} supplied with invalid option."
+          level :warn
+        end
+      else
+        homebrew_package package do
+          version action_option
+          options final_install_options
+          ignore_failure ignore_failure
+          action :install
+        end
       end
   end
 end
