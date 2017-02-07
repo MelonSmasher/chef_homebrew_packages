@@ -1,19 +1,12 @@
 name 'homebrew_packages'
-maintainer 'The Authors'
-maintainer_email 'you@example.com'
-license 'all_rights'
-description 'Installs/Configures homebrew_packages'
-long_description 'Installs/Configures homebrew_packages'
+maintainer 'Alex Markessinis'
+maintainer_email 'markea125@gmail.com'
+license 'MIT'
+description 'Install and updates homebrew packages defined in attributes.'
+long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version '0.1.0'
-
-# The `issues_url` points to the location where issues for this cookbook are
-# tracked.  A `View Issues` link will be displayed on this cookbook's page when
-# uploaded to a Supermarket.
-#
-# issues_url 'https://github.com/<insert_org_here>/homebrew_packages/issues' if respond_to?(:issues_url)
-
-# The `source_url` points to the development reposiory for this cookbook.  A
-# `View Source` link will be displayed on this cookbook's page when uploaded to
-# a Supermarket.
-#
-# source_url 'https://github.com/<insert_org_here>/homebrew_packages' if respond_to?(:source_url)
+supports 'mac_os_x'
+issues_url 'https://github.com/MelonSmasher/chef_homebrew_packages/issues' if respond_to?(:issues_url)
+source_url 'https://github.com/MelonSmasher/chef_homebrew_packagess' if respond_to?(:source_url)
+chef_version "~> 12"
+suggests 'homebrew'
