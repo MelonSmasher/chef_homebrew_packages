@@ -116,6 +116,7 @@ node['homebrew_packages']['packages'].each do |package, package_options|
       end
     when 'upgrade'
       if package_options['cask']
+        install_cask(package, ignore_failure, final_install_options)
         upgrade_cask(package, ignore_failure, final_install_options)
       else
         run_upstream(package, :upgrade, final_install_options, ignore_failure)
