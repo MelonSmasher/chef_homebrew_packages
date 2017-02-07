@@ -1,4 +1,5 @@
-require 'mixlib/shellout'
+include Chef::Mixin::ShellOut
+
 #
 # Cookbook:: homebrew_packages
 # Recipe:: default
@@ -18,7 +19,7 @@ def install_cask(name, ignore_failure, options)
     ignore_failure ignore_failure
     user homebrew_owner
     environment lazy { {'HOME' => ::Dir.home(homebrew_owner), 'USER' => homebrew_owner} }
-    not_if Mixlib::ShellOut.new("/usr/local/bin/brew cask list 2>/dev/null").run_command.stdout.split.include?(name)
+    not_if shell_out!("/usr/local/bin/brew cask list 2>/dev/null").stdout.split.include?(name)
     command "brew cask install #{name} #{options}".strip!
   end
 end
@@ -28,13 +29,13 @@ def uninstall_cask(name, ignore_failure, options)
     ignore_failure ignore_failure
     user homebrew_owner
     environment lazy { {'HOME' => ::Dir.home(homebrew_owner), 'USER' => homebrew_owner} }
-    only_if Mixlib::ShellOut.new("/usr/local/bin/brew cask list 2>/dev/null").run_command.stdout.split.include?(name)
+    only_if shell_out!("/usr/local/bin/brew cask list 2>/dev/null").stdout.split.include?(name)
     command "brew cask uninstall #{name} #{options}".strip!
   end
 end
 
 def upgrade_cask(name, ignore_failure, options)
-  if Mixlib::ShellOut.new("/usr/local/bin/brew cask list 2>/dev/null").run_command.stdout.split.include?(name).equal?(true)
+  if shell_out!("/usr/local/bin/brew cask list 2>/dev/null").stdout.split.include?(name)
     execute 'cask_upgrade' do
       ignore_failure ignore_failure
       user homebrew_owner
